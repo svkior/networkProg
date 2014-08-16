@@ -14,16 +14,27 @@ Rectangle {
 	}
 
 	TextInput {
-		id: inputIP
+		id: inp1
 		width: 240
 		x : 120
 		y : 10
-		text: "127.0.0.1"
+		text: "http"
 		font.pointSize: 20
-		color: "blue"
+		color: "steelblue"
 		focus: true
-		onAccepted: bridge.handleClick(inputIP)
-		Component.onCompleted: inputIP.selectAll()
+		onAccepted: bridge.handleClick(inp2, inp1)
+		Component.onCompleted: inp1.selectAll()
+	}
+
+	TextInput {
+		id: inp2
+		width: 240
+		x : 120
+		y : 30
+		text: "tcp"
+		font.pointSize: 20
+		color: "steelblue"
+		Component.onCompleted: inp2.selectAll()
 	}
 
 
@@ -34,7 +45,7 @@ Rectangle {
 		anchors.leftMargin: 10
 		anchors.bottom: bottomBar.top
 		anchors.bottomMargin: 30
-		anchors.top: inputIP.bottom
+		anchors.top: inp2.bottom
 		anchors.topMargin: 30
 		//anchors.top: parent.top 
 		model: logs.len
@@ -64,7 +75,7 @@ Rectangle {
 		id: bottomBar
 		anchors.horizontalCenter: parent.horizontalCenter
 		anchors.bottom: parent.bottom
-		text: "Выводит все IP адреса для данного домена"
+		text: "Вводим название сервиса, получаем порт"
 		color: "steelblue"
 		font.pointSize: 20
 	}

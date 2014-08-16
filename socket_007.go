@@ -5,6 +5,8 @@ import (
 	"gopkg.in/qml.v0"
 	"net"
 	"os"
+	"strings"
+	"time"
 )
 
 type Bridge struct {
@@ -38,30 +40,21 @@ func (l *Logs) Record(index int) string {
 }
 
 func (b *Bridge) Log(log string) {
-	b.logs.Add(LogRecord{record: log, rType: "info"})
+	strSplits := strings.Split(log, "\n")
+	for _, s := range strSplits {
+		if len(s) > 0 {
+			b.logs.Add(LogRecord{record: s, rType: "info"})
+		}
+	}
 }
 
 func (b *Bridge) ErrorLog(log string) {
 	b.logs.Add(LogRecord{record: log, rType: "error"})
 }
 
-func (b *Bridge) HandleClick(edtIP qml.Object) {
-	name := edtIP.String("text")
-	addrs, err := net.LookupHost(name)
-
-	if err != nil {
-		b.Log(fmt.Sprintf("Resolution error: (%s)", err.Error()))
-	} else {
-		for i, s := range addrs {
-			b.Log(fmt.Sprintf("%s (%d) : %s", name, i, s))
-		}
-		edtIP.Call("selectAll")
-	}
-}
-
 func main() {
 
-	if err := run("socket_004.qml"); err != nil {
+	if err := run("socket_007.qml"); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %s\n", err)
 		os.Exit(1)
 	}
@@ -92,6 +85,32 @@ func run(qmlName string) error {
 	win := component.CreateWindow(nil)
 
 	win.Show()
+	go func() {
+		service := ":1200"
+		tcpAddr, err := net.ResolveTCPAddr("tcp", service)
+		if err != nil {
+			bridge.Log(fmt.Sprintf("Error get tcpAddr: %s", err.Error()))
+			return
+		}
+		listener, err := net.ListenTCP("tcp", tcpAddr)
+		if err != nil {
+			bridge.Log(fmt.Sprintf("Error listen tcpAddr: %s", err.Error()))
+			return
+		}
+
+		for {
+			conn, err := listener.Accept()
+			if err != nil {
+				continue
+			}
+
+			daytime := time.Now().String()
+			remoteHost := conn.RemoteAddr().String()
+			bridge.Log(fmt.Sprintf("Send %s to %s", daytime, remoteHost))
+			conn.Write([]byte(daytime))
+			conn.Close()
+		}
+	}()
 	win.Wait()
 	return nil
 }

@@ -6,37 +6,44 @@ Rectangle {
 	width: 800; height: 600
 	color: "black"
 	Text {
+		id: vvod
 		x: 8
 		y: 10
 		color: "white"
 		font.pointSize: 20
 		text: "Ввод:"
 	}
+	/*
 
 	TextInput {
-		id: inputIP
+		id: inp1
 		width: 240
 		x : 120
 		y : 10
-		text: "127.0.0.1"
+		text: "www.ya.ru:80"
 		font.pointSize: 20
-		color: "blue"
+		color: "steelblue"
 		focus: true
-		onAccepted: bridge.handleClick(inputIP)
-		Component.onCompleted: inputIP.selectAll()
+		//onAccepted: bridge.handleClick(inp1)
+		Component.onCompleted: inp1.selectAll()
 	}
-
+	*/
 
 	ListView{
 		id: listView1
+		objectName: "logview"
 		anchors.right: parent.right
 		anchors.left: parent.left
 		anchors.leftMargin: 10
 		anchors.bottom: bottomBar.top
 		anchors.bottomMargin: 30
-		anchors.top: inputIP.bottom
+		anchors.top: vvod.bottom
 		anchors.topMargin: 30
 		//anchors.top: parent.top 
+		currentIndex: -1
+		onCountChanged: {
+			listView1.positionViewAtIndex(listView1.count -1, listView1.End)
+		}
 		model: logs.len
 		delegate: Row {
 			id: row1
@@ -64,7 +71,7 @@ Rectangle {
 		id: bottomBar
 		anchors.horizontalCenter: parent.horizontalCenter
 		anchors.bottom: parent.bottom
-		text: "Выводит все IP адреса для данного домена"
+		text: "Эхо Сервер Однопоточный"
 		color: "steelblue"
 		font.pointSize: 20
 	}

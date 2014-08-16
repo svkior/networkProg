@@ -14,17 +14,18 @@ Rectangle {
 	}
 
 	TextInput {
-		id: inputIP
+		id: inp1
 		width: 240
 		x : 120
 		y : 10
-		text: "127.0.0.1"
+		text: "www.ya.ru:80"
 		font.pointSize: 20
-		color: "blue"
+		color: "steelblue"
 		focus: true
-		onAccepted: bridge.handleClick(inputIP)
-		Component.onCompleted: inputIP.selectAll()
+		onAccepted: bridge.handleClick(inp1)
+		Component.onCompleted: inp1.selectAll()
 	}
+
 
 
 	ListView{
@@ -34,7 +35,7 @@ Rectangle {
 		anchors.leftMargin: 10
 		anchors.bottom: bottomBar.top
 		anchors.bottomMargin: 30
-		anchors.top: inputIP.bottom
+		anchors.top: inp1.bottom
 		anchors.topMargin: 30
 		//anchors.top: parent.top 
 		model: logs.len
@@ -64,7 +65,7 @@ Rectangle {
 		id: bottomBar
 		anchors.horizontalCenter: parent.horizontalCenter
 		anchors.bottom: parent.bottom
-		text: "Выводит все IP адреса для данного домена"
+		text: "Вводим сервер:http и получаем HEAD от /"
 		color: "steelblue"
 		font.pointSize: 20
 	}

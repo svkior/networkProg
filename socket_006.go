@@ -3,8 +3,10 @@ package main
 import (
 	"fmt"
 	"gopkg.in/qml.v0"
+	"io/ioutil"
 	"net"
 	"os"
+	"strings"
 )
 
 type Bridge struct {
@@ -38,30 +40,54 @@ func (l *Logs) Record(index int) string {
 }
 
 func (b *Bridge) Log(log string) {
-	b.logs.Add(LogRecord{record: log, rType: "info"})
+	strSplits := strings.Split(log, "\n")
+	for _, s := range strSplits {
+		if len(s) > 0 {
+			b.logs.Add(LogRecord{record: s, rType: "info"})
+		}
+	}
 }
 
 func (b *Bridge) ErrorLog(log string) {
 	b.logs.Add(LogRecord{record: log, rType: "error"})
 }
 
-func (b *Bridge) HandleClick(edtIP qml.Object) {
-	name := edtIP.String("text")
-	addrs, err := net.LookupHost(name)
+func (b *Bridge) HandleClick(inpService qml.Object) {
+	serivce := inpService.String("text")
 
+	tcpAddr, err := net.ResolveTCPAddr("tcp4", serivce)
 	if err != nil {
-		b.Log(fmt.Sprintf("Resolution error: (%s)", err.Error()))
-	} else {
-		for i, s := range addrs {
-			b.Log(fmt.Sprintf("%s (%d) : %s", name, i, s))
-		}
-		edtIP.Call("selectAll")
+		b.Log(fmt.Sprintf("Error: (%s)", err.Error()))
+		return
 	}
+
+	conn, err := net.DialTCP("tcp", nil, tcpAddr)
+	if err != nil {
+		b.Log(fmt.Sprintf("Error: (%s)", err.Error()))
+		return
+	}
+
+	_, err = conn.Write([]byte("HEAD / HTTP/1.0\r\n\r\n"))
+	if err != nil {
+		b.Log(fmt.Sprintf("Error: (%s)", err.Error()))
+		conn.Close()
+		return
+	}
+
+	result, err := ioutil.ReadAll(conn)
+	if err != nil {
+		b.Log(fmt.Sprintf("Error: (%s)", err.Error()))
+		conn.Close()
+		return
+	}
+
+	b.Log(string(result))
+	inpService.Call("selectAll")
 }
 
 func main() {
 
-	if err := run("socket_004.qml"); err != nil {
+	if err := run("socket_006.qml"); err != nil {
 		fmt.Fprintf(os.Stderr, "error: %s\n", err)
 		os.Exit(1)
 	}
